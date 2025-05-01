@@ -1,72 +1,665 @@
-## 1.  UI 설계를 확인하기 위해서 아래에 제시한 내용 중에서 잘못된 검토 내용 2가지를 찾아 그 번호를 작성하시오.
-- 잘못된 이유를 작성할 필요는 없다.
+## 1. useState()를 사용하여 다음과 같은 결과가 출력되도록 해보시오.
+
+![image](img/img.gif)
+
+- src에 Sol1.js 컴포넌트로 만든다.
+### 풀이
+```js
+import React, {useState} from 'react';
+
+function Sol1(){
+    const [ eating, SetEating] = useState(['초콜릿','사탕'])
+    const[value, SetValue] = useState("");
+
+    const inputHandler = (e) => {
+        SetValue(e.target.value)
+    }
+
+    const clickHandler = () => {
+        SetEating(prev => [value, ...prev])
+    }
+    return (
+        <div>
+            <input onChange={inputHandler} type="text"/>
+            <buttont onClick={clickHandler}>추가</buttont>
+            <ul>
+                {eating.map((item,idx) =>(
+                    <li key={idx}>{item}</li>
+                ))}
+            </ul>
+        </div>
+    )
+}
+
+export default Sol1;
+```
+
+## 2. useEffect()를 이용하여 다음과 같은 결과를 출력하는 코드를 작성하세요.
+
+![image](img/img2.gif)
+```
+<<조건>>
+- '렌더링 완료' 최초 한번만 출력
+- 버튼 클릭 시, 콘솔에 "count 값이 바뀜" 출력
+- text 입력 시, 콘솔에 "input 값이 바뀜" 출력
+```
+- src에 Sol2.js 컴포넌트로 만든다.
+### 풀이
+```js
+import React, {useEffect, useState} from 'react'
+
+function Sol2(){
+    const [count, setCount] = useState(0)
+    const [text, setText] = useState("");
+
+    const inputHandler = (e) => {
+        console.log('input 값이 바뀜')
+        setText(e.target.value)
+    }
+
+    const countHandler = () => {
+        console.log("count값이 바뀜")
+        setCount(count + 1)
+    }
+
+    useEffect(() => {
+        console.log("렌더링 완료")
+    },[])
+
+    return(
+        <div>
+            <h3>{count}<h3>
+            <button onClick={countHandler}> + 1 </button>
+            <hr/>
+            <input onChange={inputHandler} type="text"/>
+            <h3>{text}</h3>
+        <div>
+    );
+}
+
+export default Sol2
+```
+
+## 3. useEffect()를 사용하여 렌더링 횟수를 출력하는 프로그램을 만들어보세요.
+
+![image](img/img3.gif)
+
+- src에 Sol3.js 컴포넌트로 만든다.
+### 풀이
+```js
+import React, {useEffect, useState} from 'react'
+
+function Sol2(){
+    const [count, setCount] = useState(0)
+    const [renderCount, setRenderCount] = useState(0);
+
+    const clickHandler = () => {
+        setCount(count + 1)
+    }
+
+    useEffect(() => {
+        setRenderCount(renderCount + 1);
+        console.log("렌더링 완료")
+    },[count])
+
+    return(
+        <div>
+            <h1>Count : {count}</h1>
+            <h1>렌더링 횟수 : {renderCount}</h1>
+            <button onClick={clickhandler}>클릭</button>
+        <div>
+    );
+}
+
+export default Sol3
+```
+
+## 상품 카테고리와 상품 상세 페이지를 구현해보자.
+- 카테고리별 상품들이 나오게 만들어보세요
+```js
+<<조건>>
+- 카테고리 경로: /categories/:categoryId
+- 상품 상세 경로: /categories/:categoryId/products/:productId
+- App.js에 컴포넌트 라우트를 설정하세요
+- 데이터는 다음을 사용합니다.
+
+- 카테고리
+const categories = [
+{ id: 1, name: '전자제품' },
+{ id: 2, name: '의류' },
+{ id: 3, name: '식료품' },
+];
+
+- 카테고리별 상품
+const products = [
+{ id: 1, name: '노트북', categoryId: '1' },
+{ id: 2, name: '스마트폰', categoryId: '1' },
+{ id: 3, name: '셔츠', categoryId: '2' },
+{ id: 4, name: '청바지', categoryId: '2' },
+{ id: 5, name: '사과', categoryId: '3' },
+{ id: 6, name: '우유', categoryId: '3' },
+];
+
+- 상품 상세 정보를 담은 배열
+const p_detail = [
+{ id: 1, name: '노트북', description: '최신형 노트북입니다.', categoryId: '1' },
+{ id: 2, name: '스마트폰', description: '최신 스마트폰입니다.', categoryId: '1' },
+{ id: 3, name: '셔츠', description: '멋진 셔츠입니다.', categoryId: '2' },
+{ id: 4, name: '청바지', description: '편안한 청바지입니다.', categoryId: '2' },
+{ id: 5, name: '사과', description: '신선한 사과입니다.', categoryId: '3' },
+{ id: 6, name: '우유', description: '신선한 우유입니다.', categoryId: '3' },
+];
+```
+### 결과 예
+- 브라우저에서 /categories로 접속하면 카테고리 목록이 표시된다.
+
+![img](img/결과이미지1.png)
+- 카테고리를 클릭하면 해당 카테고리의 상품 목록이 표시된다. 예: /categories/1
+
+![img](img/결과이미지2.png)
+- 상품을 클릭하면 해당 상품의 상세 정보가 표시된다. 예: /categories/1/products/2
+
+![img](img/결과이미지3.png)
+
+
+### 풀이
+- App.js
+```js
+// App.js
+
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Categories from './Categories';
+import Products from './Products';
+import ProductDetail from './ProductDetail';
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/categories" element={<Categories />} />
+      <Route path="/categories/:categoryId" element={<Products />} />
+      <Route path="/categories/:categoryId/products/:productId" element={<ProductDetail />} />
+    </Routes>
+  );
+}
+
+export default App;
+```
+- Categories.js
+```js
+// Categories.js
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+function Categories() {
+  const categories = [
+    { id: 1, name: '전자제품' },
+    { id: 2, name: '의류' },
+    { id: 3, name: '식료품' },
+  ];
+
+  return (
+    <div>
+      <h1>카테고리 목록</h1>
+      <ul>
+        {categories.map(category => (
+          <li key={category.id}>
+            <Link to={`/categories/${category.id}`}>{category.name}</Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default Categories;
+```
+- Products.js
+```js
+// Products.js
+
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
+
+function Products() {
+  const { categoryId } = useParams();
+
+  // 실제로는 서버에서 카테고리 ID에 따른 상품 목록을 가져와야 한다.
+  // 여기서는 예시를 위해 하드코딩한다.
+  const products = [
+    { id: 1, name: '노트북', categoryId: '1' },
+    { id: 2, name: '스마트폰', categoryId: '1' },
+    { id: 3, name: '셔츠', categoryId: '2' },
+    { id: 4, name: '청바지', categoryId: '2' },
+    { id: 5, name: '사과', categoryId: '3' },
+    { id: 6, name: '우유', categoryId: '3' },
+  ];
+
+  const filteredProducts = products.filter(product => product.categoryId === categoryId);
+
+  return (
+    <div>
+      <h1>카테고리 {categoryId}의 상품 목록</h1>
+      <ul>
+        {filteredProducts.map(product => (
+          <li key={product.id}>
+            <Link to={`/categories/${categoryId}/products/${product.id}`}>{product.name}</Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default Products;
+```
+- ProductDetail.js
+```js
+// ProductDetail.js
+
+import React from 'react';
+import { useParams } from 'react-router-dom';
+
+function ProductDetail() {
+  const { categoryId, productId } = useParams();
+
+  // 상품 상세 정보를 담은 배열
+  const p_detail = [
+    { id: 1, name: '노트북', description: '최신형 노트북입니다.', categoryId: '1' },
+    { id: 2, name: '스마트폰', description: '최신 스마트폰입니다.', categoryId: '1' },
+    { id: 3, name: '셔츠', description: '멋진 셔츠입니다.', categoryId: '2' },
+    { id: 4, name: '청바지', description: '편안한 청바지입니다.', categoryId: '2' },
+    { id: 5, name: '사과', description: '신선한 사과입니다.', categoryId: '3' },
+    { id: 6, name: '우유', description: '신선한 우유입니다.', categoryId: '3' },
+  ];
+
+  const product = p_detail.find(
+    item => item.id === Number(productId) && item.categoryId === categoryId
+  );
+
+  if (!product) {
+    return <div>상품을 찾을 수 없습니다.</div>;
+  }
+
+  return (
+    <div>
+      <h1>{product.name}</h1>
+      <p>카테고리 ID: {categoryId}</p>
+      <p>상품 ID: {productId}</p>
+      <p>설명: {product.description}</p>
+    </div>
+  );
+}
+
+export default ProductDetail;
+```
+
+
+## URL 파라미터를 사용하여 다국어 지원을 위한 경로를 만들어보자.
+- 경로 예시: /:lang/home
+lang 파라미터로 언어 코드를 받아서 해당 언어에 맞는 내용을 보여준다.
+
+### 결과 확인
+```
+- 브라우저에서 /ko/home으로 접속하면 한국어 페이지가 표시된다.
+- /en/home으로 접속하면 영어 페이지가 표시된다.
+- /jp/home으로 접속하면 일본어 페이지가 표시된다.
+- 지원하지 않는 언어 코드로 접속하면 오류 메시지가 표시된다.
+```
+
+### 풀이
+- index.js
+```js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import {BrowserRouter} from 'react-router-dom'
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+```
+- App.js
+```js
+
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Home from './Home';
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/:lang/home" element={<Home />} />
+    </Routes>
+  );
+}
+
+export default App;
+```
+- Home.js
+```js
+import React from 'react';
+import { useParams } from 'react-router-dom';
+
+function Home() {
+  const { lang } = useParams();
+
+  const content = {
+    ko: {
+      greeting: '안녕하세요!',
+      description: '이것은 한국어 페이지입니다.',
+    },
+    en: {
+      greeting: 'Hello!',
+      description: 'This is an English page.',
+    },
+    jp: {
+      greeting: 'こんにちは！',
+      description: 'これは日本語のページです。',
+    },
+  };
+
+  const languageContent = content[lang];
+
+  if (!languageContent) {
+    return <div>지원하지 않는 언어입니다.</div>;
+  }
+
+  return (
+    <div>
+      <h1>{languageContent.greeting}</h1>
+      <p>{languageContent.description}</p>
+    </div>
+  );
+}
+
+export default Home;
+```
+
+## 1. Context API로 다크 모드 상태 관리하기
+- React의 Context API를 사용하여 **다크 모드(Dark Mode)**를 구현하세요. 
+- 사용자는 라이트 모드와 다크 모드를 전환할 수 있어야 하며, 선택된 테마에 따라 화면의 스타일이 변경됩니다.
+```js
+<<요구 사항>>
+1. ThemeContext를 생성하여, 전역적으로 다크 모드 상태를 관리하세요.
+2. ThemeProvider 컴포넌트를 만들어, 전역적으로 테마 상태를 관리하고 이를 하위 컴포넌트에 제공하세요.
+3. ThemeSwitcher 컴포넌트를 만들어, 사용자가 다크 모드와 라이트 모드를 전환할 수 있게 하세요.
+4. App 컴포넌트의 배경색과 텍스트 색상을 다크 모드/라이트 모드에 맞게 변경하세요.
+```
+### 풀이
+####  ThemeContext.js
+- 다크 모드 상태를 전역적으로 관리하기 위한 **ThemeContext**와 **ThemeProvider**를 정의한다.
+```js
+// ThemeContext.js
+import React, { createContext, useState } from 'react';
+
+// Context 생성
+export const ThemeContext = createContext();
+
+// ThemeProvider 컴포넌트
+export const ThemeProvider = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState(false); // 기본값은 라이트 모드
+
+  const toggleTheme = () => {
+    setIsDarkMode((prevMode) => !prevMode); // 다크 모드와 라이트 모드를 전환
+  };
+
+  return (
+    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+```
+
+#### App.js
+```js
+// App.js
+import React, { useContext } from 'react';
+import { ThemeContext } from './ThemeContext';
+import ThemeSwitcher from './ThemeSwitcher';
+
+function App() {
+  const { isDarkMode } = useContext(ThemeContext);
+
+  return (
+    <div
+      style={{
+        backgroundColor: isDarkMode ? '#333' : '#fff',
+        color: isDarkMode ? '#fff' : '#000',
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <h1>{isDarkMode ? '다크 모드' : '라이트 모드'}</h1>
+      <ThemeSwitcher />
+    </div>
+  );
+}
+
+export default App
+
 
 ```
-    1) UI가 디자이너 측면에서 설계되고 디자이너 편리성이 반영되었는가?
 
-    2) 화면 이동이 쉽게 설계되었는가?
+#### ThemeSwitcher.js
+```js
+// ThemeSwitcher.js
+import React, { useContext } from 'react';
+import { ThemeContext } from './ThemeProvider';
 
-    3) 사용자가 요구하는 내용을 직관적으로 파악할 수 있도록 되어 있는가?
+function ThemeSwitcher() {
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
 
-    4) 논리적인 메뉴 구조를 갖추고 있으며 메뉴의 의미 전달이 정확하게 되어 있는가?
+  return (
+    <button onClick={toggleTheme}>
+      {isDarkMode ? '라이트 모드로 전환' : '다크 모드로 전환'}
+    </button>
+  );
+}
 
-    5) 화면에 표시할 정보, 화면 구성, 화면 간 흐름 등에 대한 표시가 잘 나타나 있는가?
-
-    6) 로그인/로그아웃 버튼이 개성있는 자리에 위치에 자리하고 있는가?
-```
-### 정답
-```
-1 , 6 
-```
-
-
-## 2. 아래의 조건을 만족하는 키워드를 작성하세요
-```
-<< 조건 >>
-
-아이디와 비밀번호를 입력하는 입력 태그(input)에 값이 입력되어야만 폼의 데이터를 전송(submit)할 수 있도록 처리하려면 해당 input 태그에 어떤 속성(attribute)을 부여해야 하는가?
+export default ThemeSwitcher;
 ```
 
-### 정답
-- required
+#### index.js
+```js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import { ThemeProvider } from './ThemeContext';
 
-## 3. 아래 문제를 읽고 웹 표준을 준수하는 페이지를 구현하시오. (80점)
-1. login.html
-   - 화면과 최대한 유사한 형태로 작업하시오.
-   - 로고 이미지는 동일하지 않은 임의의 이미지를 사용해도 무방하다.
-   - 로그인 버튼을 클릭하면 계정과 비밀번호의 입력 여부와 상관 없이 board.html 페이지로 이동하시오.
-     ![image](image/login.png)
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <ThemeProvider>
+  <App />
+  </ThemeProvider>
+);
 
-2. board.html
-   - 화면과 최대한 유사한 형태로 작업하시오.
-   - 로그아웃 버튼을 클릭하면 login.html 페이지로 이동하시오.
-   - 개인정보수정 버튼을 클릭하면 personal_info.html 페이지로 이동하시오.
-   - 각 행에 마우스를 가져가면 행 배경색이 변경되도록 작업하시오.
-    ![image](image/board.png)
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+```
 
-    ![image](image/board2.png)
 
-3. personal_info.html
-   - 화면과 최대한 유사한 형태로 작업하시오.
-   - 수정완료 버튼을 클릭하면 board.html 페이지로 이동하시오.
-    ![image](image/info.png)
+## 외부 API로부터 사용자의 이름과 이메일 주소 렌더링하기
+- fetch API를 사용하여, 외부 API에서 데이터를 가져와 화면에 렌더링하는 간단한 애플리케이션을 만들어보세요.
+```
+<<조건>>
+외부 API를 호출하여 데이터를 가져옵니다. ([JSONPlaceholder의 사용자 데이터](https://jsonplaceholder.typicode.com/users))
+데이터를 가져오는 동안 로딩 상태를 표시해야 합니다.
+API 요청 실패 시, 에러 메시지를 표시해야 합니다.
+가져온 데이터를 화면에 목록 형태로 출력합니다.
+사용자의 이름과 이메일 주소를 표시하세요.
+```
 
-### 제출방법
-- 작성된 파일을 하나로 압축하여 업로드하시오
+### UserList.js
+```js
+import React, { useState, useEffect } from 'react';
 
-### 정답
-1. login.html
+function UserList() {
+  const [users, setUsers] = useState([]);        // 사용자 데이터를 저장할 상태
+  const [loading, setLoading] = useState(true);  // 로딩 상태 관리
+  const [error, setError] = useState(null);      // 에러 상태 관리
 
-![image](image/login_answer1.png)
-![image](image/login_answer2.png)
+  useEffect(() => {
+    // 비동기 함수 정의
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/users');
+        if (!response.ok) {
+          throw new Error('데이터를 불러오는데 실패했습니다.');
+        }
+        const data = await response.json();
+        setUsers(data);  // 데이터를 상태에 저장
+      } catch (err) {
+        setError(err.message);  // 에러 처리
+      } finally {
+        setLoading(false);  // 로딩 상태를 완료로 설정
+      }
+    };
 
-2. board.html
 
-![image](image/board_answer1.png)
-![image](image/board_answer2.png)
+    //useEffect 안에서 fetchUsers()를 호출하는 이유는 useEffect 훅이 비동기 함수를 직접적으로 지원하지 않기 때문이다.
+    //
+    fetchUsers(); // API 호출
+  }, []);
 
-3. personal_info.html
+  // 로딩 중일 때 표시할 UI
+  if (loading) {
+    return <p>로딩 중...</p>;
+  }
 
-![image](image/info_answer1.png)
-![image](image/info_answer2.png)
+  // 에러가 발생했을 때 표시할 UI
+  if (error) {
+    return <p>에러 발생: {error}</p>;
+  }
 
+  // 데이터를 성공적으로 불러왔을 때 표시할 UI
+  return (
+    <div>
+      <h1>사용자 목록</h1>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>
+            {user.name} - {user.email}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default UserList;
+````
+
+### 블로그앱 만들기
+- 게시물 리스트를 불러오는 컴포넌트
+- 게시물 추가 기능
+- 게시물 삭제 기능
+
+```js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function App() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [newPost, setNewPost] = useState({ title: '', body: '' });
+
+  // 게시물 리스트 불러오기
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
+        setPosts(response.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  // 새 게시물 추가하기
+  const addPost = async () => {
+    if (!newPost.title || !newPost.body) return alert('모든 필드를 입력해 주세요.');
+
+    try {
+      const response = await axios.post('https://jsonplaceholder.typicode.com/posts', newPost);
+      setPosts([response.data, ...posts]);
+      setNewPost({ title: '', body: '' });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // 게시물 삭제하기
+  const deletePost = async (id) => {
+    try {
+      await axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`);
+      setPosts(posts.filter(post => post.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  if (loading) return <p>Loading posts...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <div className="App">
+      <h1>블로그 게시물</h1>
+
+      {/* 새 게시물 추가하기 */}
+      <div>
+        <h2>새 게시물 추가</h2>
+        <input
+          type="text"
+          placeholder="제목"
+          value={newPost.title}
+          onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+        />
+        <textarea
+          placeholder="내용"
+          value={newPost.body}
+          onChange={(e) => setNewPost({ ...newPost, body: e.target.value })}
+        />
+        <button onClick={addPost}>게시물 추가</button>
+      </div>
+
+      {/* 게시물 리스트 */}
+      <div>
+        <h2>게시물 리스트</h2>
+        {posts.map(post => (
+          <div key={post.id} style={{ border: '1px solid black', margin: '10px', padding: '10px' }}>
+            <h3>{post.title}</h3>
+            <p>{post.body}</p>
+            <button onClick={() => deletePost(post.id)}>삭제</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
