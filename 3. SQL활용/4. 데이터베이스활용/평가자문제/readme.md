@@ -41,7 +41,7 @@ NOCACHE;
 - NO 칼럼의 데이터는 SEQ_PRODUCT_NO 오라클 시퀀스를 활용하여 입력하시오.
 - P_DATE 칼럼의 데이터 중 하나 이상은 반드시 현재 날짜를 호출하는 오라클 함수를 사용하시오.
 
-![image](image/PRODUCT3.png)
+![image](../image/PRODUCT3.png)
 
 ### 정답
 ```SQL
