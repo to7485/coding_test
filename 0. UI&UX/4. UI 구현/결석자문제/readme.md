@@ -102,11 +102,11 @@
 
 <<디자인 가이드>>
 
-![image](img/1.png)
+![image](../img/1.png)
 
 <<구현 결과 화면>>
 
-![image](img/2.png)
+![image](../img/2.png)
 
 
 ## 2. 다음의 문제를 해결하시오(30점)
@@ -123,8 +123,8 @@
 1) 아이디나 비밀번호가 입력되지 않은 상태로 로그인 버튼을 클릭하여 submit을 요청하면 아래와 같은 경고 메시지를 출력하시오.<br>
 경고 메시지 출력 후에는 입력되지 않은 입력 요소에 커서를 자동으로 옮기고 submit 되지 않도록 처리하시오.
 
-![image](img/3.png)
-![image](img/4.png)
+![image](../img/3.png)
+![image](../img/4.png)
 
 2) 아이디와 비밀번호를 모두 입력한 상태로 로그인 버튼을 클릭하면 index.html로 submit 할 수 있도록 구현하시오.<br>index.html 파일을 생성할 필요는 없고, submit에 필요한 코드만 login.html에 작성하시오.
 
@@ -139,11 +139,11 @@
 
 << 입력된 아이디가 4글자 미만인 경우 >>
 
-![image](img/5.png)
+![image](../img/5.png)
 
 << 입력된 아이디가 4글자 이상인 경우 >>
 
-![image](img/6.png)
+![image](../img/6.png)
 
 ### [답안 제출 방식] 
 - 작업한 파일 4개(login.html + login.css + login.js + logo.png)를 모두 하나의 파일로 압축하여 제출하시오.
