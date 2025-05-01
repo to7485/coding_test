@@ -80,7 +80,7 @@ WHERE NAME = '세탁기';
 
 # 6. PRODUCT 테이블에서 다음과 같이 데이터를 조회하시오.
 
-![image](image/PRODUCT1.png)
+![image](../image/PRODUCT1.png)
 
 ### 정답
 ```sql
@@ -102,7 +102,7 @@ SELECT * FROM PRODUCT ORDER BY PRICE DESC;
 - P_DTAE 별로 그룹화 하여 P_DATE별로 생산된 제품의 평균가격을 조회하시오.
 - 평균가격과 P_DATE칼럼을 함께 조회하시오
 
-![image](image/PRODUCT2.png)
+![image](../image/PRODUCT2.png)
 
 ## 정답
 ```SQL
