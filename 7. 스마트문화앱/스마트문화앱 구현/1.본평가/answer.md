@@ -1,168 +1,185 @@
 ## App.js
 
-```jsx
+```js
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import StackNavigation from '../src/navigation/StackNavigation';
+import StackNavigator from './navigation/StackNavigator';
 
-const App = () => (
- <NavigationContainer>
-   <StackNavigation />
- </NavigationContainer>
-);
-
-export default App;
+export default function App() {
+  return (
+    <NavigationContainer>
+      <StackNavigator />
+    </NavigationContainer>
+  );
+}
 ```
 
-## StackNavigation.js
-```jsx
+## navigation/StackNavigator.js
+```js
 import React from 'react';
-import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from '../screens/LoginScreen';
-import SignupScreen from '../screens/SignupScreen';
+import { createStackNavigator } from '@react-navigation/stack';
+import SearchScreen from '../screens/SearchScreen';
+import DetailScreen from '../screens/DetailScreen';
 
 const Stack = createStackNavigator();
 
-const StackNavigation = () => (
- <Stack.Navigator screenOptions={{ headerShown: false }}>
-   <Stack.Screen name="Login" component={LoginScreen} />
-   <Stack.Screen name="Signup" component={SignupScreen} />
- </Stack.Navigator>
-);
-
-export default StackNavigation;
-
-```
-
-## SignupScreen.js
-```jsx
-import React, { useState } from 'react';
-import styled from 'styled-components/native';
-import CustomInput from '../components/CustomInput';
-import CustomButton from '../components/CustomButton';
-
-const Container = styled.View`
- flex: 1;
- justify-content: center;
- align-items: center;
- padding: 20px;
-`;
-
-const Title = styled.Text`
- font-size: 28px;
- margin-bottom: 20px;
- font-weight: bold;
-`;
-
-const SignupScreen = ({ navigation }) => {
- const [name, setName] = useState('');
- const [email, setEmail] = useState('');
- const [password, setPassword] = useState('');
-
- return (
-   <Container>
-     <Title>회원가입</Title>
-     <CustomInput placeholder="이름" value={name} onChangeText={setName} />
-     <CustomInput placeholder="이메일" value={email} onChangeText={setEmail} />
-     <CustomInput placeholder="비밀번호" value={password} onChangeText={setPassword} secureTextEntry />
-     <CustomButton title="회원가입" onPress={() => console.log('회원가입 버튼 클릭')} />
-     <CustomButton title="로그인" backgroundColor="#e67e22" onPress={() => navigation.navigate('Login')} />
-   </Container>
- );
+const StackNavigator = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Search" component={SearchScreen} options={{ title: '도서 검색' }} />
+      <Stack.Screen name="Detail" component={DetailScreen} options={{ title: '상세 정보' }} />
+    </Stack.Navigator>
+  );
 };
 
-export default SignupScreen;
+export default StackNavigator;
 ```
 
-## LoginScreen.js
+## api/naverApi.js
+```js
+import axios from 'axios';
+import { NAVER_CLIENT_ID, NAVER_CLIENT_SECRET } from '../constants/apiConfig';
 
-```jsx
-import React, { useState } from 'react';
-import styled from 'styled-components/native';
-import CustomInput from '../components/CustomInput';
-import CustomButton from '../components/CustomButton';
+export const searchBooks = async (query) => {
+  try {
+    const res = await axios.get('https://openapi.naver.com/v1/search/book.json', {
+      params: { query, display: 20 },
+      headers: {
+        'X-Naver-Client-Id': NAVER_CLIENT_ID,
+        'X-Naver-Client-Secret': NAVER_CLIENT_SECRET,
+      },
+    });
 
-const Container = styled.View`
- flex: 1;
- justify-content: center;
- align-items: center;
- padding: 20px;
-`;
+    return res.data.items.map((item) => ({
+      title: item.title.replace(/<[^>]*>/g, ''),
+      author: item.author,
+      price: item.discount,
+      image: item.image,
+      description: item.description,
+      isbn: item.isbn,
+    }));
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+```
 
-const Title = styled.Text`
- font-size: 28px;
- margin-bottom: 20px;
- font-weight: bold;
-`;
+## constants/apiConfig.js
+```js
+export const NAVER_CLIENT_ID = 'MyOtXjysC6JFxy2J3FIo';
+export const NAVER_CLIENT_SECRET = 'lcPw7L4jHA';
+```
 
-const LoginScreen = ({ navigation }) => {
- const [email, setEmail] = useState('');
- const [password, setPassword] = useState('');
+## components/BookItem.js
+```js
+import React from 'react';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 
- return (
-   <Container>
-     <Title>로그인</Title>
-     <CustomInput placeholder="이메일" value={email} onChangeText={setEmail} />
-     <CustomInput placeholder="비밀번호" value={password} onChangeText={setPassword} secureTextEntry />
-     <CustomButton title="로그인" onPress={() => console.log('로그인 버튼 클릭')} />
-     <CustomButton title="회원가입" backgroundColor="#2ecc71" onPress={() => navigation.navigate('Signup')} />
-   </Container>
- );
+const BookItem = ({ book, onPress }) => {
+  return (
+    <Pressable onPress={onPress} style={styles.container}>
+      <Image source={{ uri: book.image }} style={styles.thumbnail} />
+      <View style={styles.info}>
+        <Text style={styles.title}>{book.title}</Text>
+        <Text style={styles.author}>{book.author}</Text>
+      </View>
+    </Pressable>
+  );
 };
 
-export default LoginScreen;
+const styles = StyleSheet.create({
+  container: { flexDirection: 'row', marginBottom: 12 },
+  thumbnail: { width: 60, height: 90, marginRight: 10 },
+  info: { flex: 1 },
+  title: { fontWeight: 'bold' },
+  author: { color: '#555' },
+});
+
+export default BookItem;
 ```
 
-## CustomInput.js
-```jsx
-import React from 'react';
-import styled from 'styled-components/native';
+## screens/SearchScreen.js
+```js
+import React, { useState } from 'react';
+import { View, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
+import BookItem from '../components/BookItem';
+import { searchBooks } from '../api/naverApi';
 
-const Input = styled.TextInput`
- width: 80%;
- padding: 12px;
- margin: 10px 0;
- border: 1px solid #ccc;
- border-radius: 8px;
-`;
+const SearchScreen = ({ navigation }) => {
+  const [query, setQuery] = useState('');
+  const [books, setBooks] = useState([]);
 
-const CustomInput = ({ placeholder, value, onChangeText, secureTextEntry = false }) => (
- <Input
-   placeholder={placeholder}
-   value={value}
-   onChangeText={onChangeText}
-   secureTextEntry={secureTextEntry}
- />
-);
+  const handleSearch = async () => {
+    try {
+      const results = await searchBooks(query);
+      if (results.length === 0) {
+        Alert.alert('검색 결과가 없습니다.');
+      }
+      setBooks(results);
+    } catch {
+      Alert.alert('네트워크 오류가 발생했습니다.');
+    }
+  };
 
-export default CustomInput;
+  return (
+    <View style={styles.container}>
+      <View style={styles.searchRow}>
+        <TextInput
+          style={styles.input}
+          placeholder="검색어를 입력하세요"
+          value={query}
+          onChangeText={setQuery}
+        />
+        <Button title="검색" onPress={handleSearch} />
+      </View>
+      <FlatList
+        data={books}
+        keyExtractor={(item) => item.isbn}
+        renderItem={({ item }) => (
+          <BookItem book={item} onPress={() => navigation.navigate('Detail', { book: item })} />
+        )}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 10 },
+  searchRow: { flexDirection: 'row', marginBottom: 10 },
+  input: { flex: 1, borderWidth: 1, borderColor: '#ccc', padding: 8, marginRight: 10 },
+});
+
+export default SearchScreen;
 ```
 
-## CustomButton.js
-```jsx
+## screens/DetailScreen.js
+```js
 import React from 'react';
-import styled from 'styled-components/native';
+import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 
-const Button = styled.TouchableOpacity`
- width: 80%;
- padding: 14px;
- background-color: ${({ backgroundColor }) => backgroundColor || '#3498db'};
- margin: 10px 0;
- border-radius: 8px;
- align-items: center;
-`;
+const DetailScreen = ({ route }) => {
+  const { book } = route.params;
 
-const ButtonText = styled.Text`
- color: white;
- font-size: 16px;
- font-weight: bold;
-`;
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Image source={{ uri: book.image }} style={styles.image} />
+      <Text style={styles.title}>{book.title}</Text>
+      <Text style={styles.author}>저자: {book.author}</Text>
+      <Text style={styles.price}>가격: {book.price}</Text>
+      <Text style={styles.description}>{book.description}</Text>
+    </ScrollView>
+  );
+};
 
-const CustomButton = ({ title, onPress, backgroundColor }) => (
- <Button onPress={onPress} backgroundColor={backgroundColor}>
-   <ButtonText>{title}</ButtonText>
- </Button>
-);
+const styles = StyleSheet.create({
+  container: { padding: 16 },
+  image: { width: '100%', height: 300, resizeMode: 'contain' },
+  title: { fontSize: 22, fontWeight: 'bold', marginTop: 16 },
+  author: { marginTop: 8, fontSize: 16 },
+  price: { marginTop: 4, fontSize: 16 },
+  description: { marginTop: 12, fontSize: 14, lineHeight: 20 },
+});
 
-export default CustomButton;
+export default DetailScreen;
 ```
