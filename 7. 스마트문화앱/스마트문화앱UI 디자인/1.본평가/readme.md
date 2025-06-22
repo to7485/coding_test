@@ -59,7 +59,7 @@
 - 로그인 버튼 (클릭 시 console.log('로그인 버튼 클릭'))
 - "회원가입" 버튼 (클릭 시 SignupScreen 이동)
 
-![img](./img/본평가_로그인.png)
+![img](../img/본평가_로그인.png)
 
 #### SignupScreen
 - 이메일 입력 필드
@@ -68,4 +68,4 @@
 - 회원가입 버튼 (클릭 시 console.log('회원가입 버튼 클릭'))
 - "로그인" 버튼 (클릭 시 LoginScreen 이동)
 
-![img](./img/본평가_회원가입.png)
+![img](../img/본평가_회원가입.png)
