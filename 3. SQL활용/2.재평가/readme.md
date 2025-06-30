@@ -1,4 +1,4 @@
-# SQL 평가문제 및 정답
+# SQL 평가문제
 
 ## 1. `project_data`라는 테이블스페이스를 생성하는 SQL을 작성하시오.
 - 데이터파일 경로: `C:/Data/project_data.dbf`
