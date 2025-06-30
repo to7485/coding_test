@@ -20,4 +20,8 @@
 - 로그인 버튼 클릭 시 confirm("로그인 하시겠습니까?")을 띄우고, 확인을 누르면 alert("로그인 완료")를 띄우고, 취소를 누르면 아무 동작이 없도록 구현하시오.
 - submit 이벤트가 실제 페이지 이동을 일으키지 않도록 처리하시오.
 
-![image](../img)
+![image](../img/re_login.png)
+
+
+## 제출방법
+- login.html,style.css,script.js를 압축하여 제출하기
