@@ -1,210 +1,210 @@
-# ✅ AlbumSearchApp 정답 예시
-
-## 📁 프로젝트 구조
-
-```
-AlbumSearchApp/
-├── App.js
-├── navigation/
-│   └── StackNavigator.js
-├── screens/
-│   ├── SearchScreen.js
-│   └── DetailScreen.js
-├── components/
-│   └── AlbumItem.js
-├── api/
-│   └── itunesApi.js
-└── constants/
-    └── apiConfig.js
-```
+# 🌗 React Theme Blog Project - 전체 코드
 
 ---
 
-## 📄 App.js
+## `/src/context/ThemeContext.js`
 
-```jsx
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import StackNavigator from './navigation/StackNavigator';
+```javascript
+import React, { createContext, useState } from "react";
 
-export default function App() {
+export const ThemeContext = createContext();
+
+export const ThemeProvider = ({ children }) => {
+  const [theme, setTheme] = useState("light");
+  const toggleTheme = () => setTheme(prev => (prev === "light" ? "dark" : "light"));
+
   return (
-    <NavigationContainer>
-      <StackNavigator />
-    </NavigationContainer>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
   );
-}
-```
-
----
-
-## 📄 navigation/StackNavigator.js
-
-```jsx
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import SearchScreen from '../screens/SearchScreen';
-import DetailScreen from '../screens/DetailScreen';
-
-const Stack = createStackNavigator();
-
-export default function StackNavigator() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="Search" component={SearchScreen} options={{ title: '앨범 검색' }} />
-      <Stack.Screen name="Detail" component={DetailScreen} options={{ title: '상세 정보' }} />
-    </Stack.Navigator>
-  );
-}
-```
-
----
-
-## 📄 constants/apiConfig.js
-
-```js
-export const ITUNES_BASE_URL = 'https://itunes.apple.com/search';
-```
-
----
-
-## 📄 api/itunesApi.js
-
-```js
-import axios from 'axios';
-import { ITUNES_BASE_URL } from '../constants/apiConfig';
-
-export const searchAlbums = async (query) => {
-  try {
-    const response = await axios.get(ITUNES_BASE_URL, {
-      params: {
-        term: query,
-        entity: 'album',
-        limit: 25,
-      },
-    });
-    return response.data.results;
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
 };
 ```
 
 ---
 
-## 📄 components/AlbumItem.js
+## `/src/components/NavBar.js`
 
-```jsx
-import React from 'react';
-import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
+```javascript
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { ThemeContext } from "../context/ThemeContext";
 
-export default function AlbumItem({ album, onPress }) {
-  return (
-    <Pressable onPress={onPress} style={styles.container}>
-      <Image source={{ uri: album.artworkUrl100 }} style={styles.image} />
-      <View style={styles.info}>
-        <Text style={styles.title}>{album.collectionName}</Text>
-        <Text style={styles.artist}>{album.artistName}</Text>
-      </View>
-    </Pressable>
-  );
-}
+const NavBar = () => {
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  const navClass = theme === "light" ? "navbar navbar-light" : "navbar navbar-dark";
 
-const styles = StyleSheet.create({
-  container: { flexDirection: 'row', marginBottom: 12 },
-  image: { width: 60, height: 60, marginRight: 10 },
-  info: { flex: 1 },
-  title: { fontWeight: 'bold' },
-  artist: { color: '#555' },
-});
+    return (
+    <nav className={navClass}>
+      <Link to="/">Home</Link>
+      <Link to="/about">About</Link>
+      <Link to="/blogs">Blogs</Link>
+      <button onClick={toggleTheme}>
+        Switch to {theme === "light" ? "Dark" : "Light"} Mode
+      </button>
+    </nav>
+      );
+};
+
+export default NavBar;
+
 ```
 
 ---
 
-## 📄 screens/SearchScreen.js
+## `/src/pages/BlogList.js`
 
-```jsx
-import React, { useState } from 'react';
-import { View, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
-import AlbumItem from '../components/AlbumItem';
-import { searchAlbums } from '../api/itunesApi';
+```javascript
+import { useEffect, useState } from "react";
 
-export default function SearchScreen({ navigation }) {
-  const [query, setQuery] = useState('');
-  const [albums, setAlbums] = useState([]);
+const BlogList = () => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleSearch = async () => {
-    if (!query.trim()) {
-      Alert.alert('검색어를 입력하세요');
-      return;
-    }
-    const results = await searchAlbums(query);
-    if (results.length === 0) {
-      Alert.alert('검색 결과가 없습니다');
-    }
-    setAlbums(results);
-  };
+  
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/posts?_limit=5")
+      .then(res => res.json())
+      .then(data => setPosts(data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.searchRow}>
-        <TextInput
-          style={styles.input}
-          placeholder="가수 또는 앨범명"
-          value={query}
-          onChangeText={setQuery}
-        />
-        <Button title="검색" onPress={handleSearch} />
-      </View>
-      <FlatList
-        data={albums}
-        keyExtractor={(item) => item.collectionId.toString()}
-        renderItem={({ item }) => (
-          <AlbumItem
-            album={item}
-            onPress={() => navigation.navigate('Detail', { album: item })}
-          />
-        )}
-      />
-    </View>
-  );
-}
+  
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10 },
-  searchRow: { flexDirection: 'row', marginBottom: 10 },
-  input: { flex: 1, borderWidth: 1, padding: 8, marginRight: 10 },
-});
+    return (
+    <ul>
+      {posts.map(post => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+      );
+};
+
+export default BlogList;
+
 ```
 
 ---
 
-## 📄 screens/DetailScreen.js
+## `/src/pages/Home.js`
+```javascript
+import React, { useContext } from "react";
+import { ThemeContext } from "../context/ThemeContext";
+const Home = () => {
+  const { theme } = useContext(ThemeContext);
+    return (
+    <div>
+      <h1>Welcome to the Blog!</h1>
+      <p>Current Theme: {theme}</p>
+    </div>
+  );
+  
+export default Home;
+```
 
-```jsx
-import React from 'react';
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+---
 
-export default function DetailScreen({ route }) {
-  const { album } = route.params;
+## `/src/pages/About.js`
+```javascript
+import React from "react";
+
+const About = () => {
+    return (
+    <div>
+      <h2>About This Blog</h2>
+      <p>This is a simple blog dashboard made with React.</p>
+    </div>
+      );
+};
+export default About;
+
+```
+
+---
+
+## `/src/App.js`
+
+```javascript
+import React, { useContext } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import NavBar from "./components/NavBar";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import BlogList from "./pages/BlogList";
+import { ThemeContext } from "./context/ThemeContext";
+import "./styles.css";
+
+const App = () => {
+  const { theme } = useContext(ThemeContext);
+
+  const appStyle = {
+    backgroundColor: theme === "light" ? "#ffffff" : "#222222",
+    color: theme === "light" ? "#000000" : "#ffffff",
+    minHeight: "100vh",
+    padding: "1rem",
+      };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Image source={{ uri: album.artworkUrl100 }} style={styles.image} />
-      <Text style={styles.title}>{album.collectionName}</Text>
-      <Text style={styles.text}>아티스트: {album.artistName}</Text>
-      <Text style={styles.text}>발매일: {album.releaseDate.substring(0, 10)}</Text>
-      <Text style={styles.text}>장르: {album.primaryGenreName}</Text>
-      <Text style={styles.text}>트랙 수: {album.trackCount}</Text>
-    </ScrollView>
-  );
+    <div style={appStyle}>
+      <BrowserRouter>
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/blogs" element={<BlogList />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
+    );
+};
+
+export default App;
+```
+
+---
+
+## `/src/index.js`
+
+```javascript
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { ThemeProvider } from "./context/ThemeContext";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>
+);
+
+```
+
+---
+
+## `/src/styles.css`
+
+```css
+.navbar {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  font-weight: bold;
 }
 
-const styles = StyleSheet.create({
-  container: { padding: 16 },
-  image: { width: '100%', height: 200, resizeMode: 'contain' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
-  text: { fontSize: 16, marginBottom: 6 },
-});
+.navbar-light {
+  background-color: #eee;
+}
+
+.navbar-dark {
+  background-color: #444;
+}
+.navbar a {
+  text-decoration: none;
+  color: inherit;
+}
 ```
