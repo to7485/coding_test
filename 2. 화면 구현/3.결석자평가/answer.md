@@ -34,7 +34,7 @@ const NavBar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const navClass = theme === "light" ? "navbar navbar-light" : "navbar navbar-dark";
 
-    return (
+  return (
     <nav className={navClass}>
       <Link to="/">Home</Link>
       <Link to="/about">About</Link>
@@ -43,11 +43,10 @@ const NavBar = () => {
         Switch to {theme === "light" ? "Dark" : "Light"} Mode
       </button>
     </nav>
-      );
+  );
 };
 
 export default NavBar;
-
 ```
 
 ---
@@ -62,66 +61,70 @@ const BlogList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  
   useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/posts?_limit=5")
       .then(res => res.json())
       .then(data => setPosts(data))
-      .catch(err => setError(err.message))
+      .catch(err => {
+        console.error(err);
+        setError(err.message);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
-    return (
+  return (
     <ul>
       {posts.map(post => (
         <li key={post.id}>{post.title}</li>
       ))}
     </ul>
-      );
+  );
 };
 
 export default BlogList;
-
 ```
 
 ---
 
 ## `/src/pages/Home.js`
+
 ```javascript
 import React, { useContext } from "react";
 import { ThemeContext } from "../context/ThemeContext";
+
 const Home = () => {
   const { theme } = useContext(ThemeContext);
-    return (
+  return (
     <div>
       <h1>Welcome to the Blog!</h1>
       <p>Current Theme: {theme}</p>
     </div>
   );
-  
+};
+
 export default Home;
 ```
 
 ---
 
 ## `/src/pages/About.js`
+
 ```javascript
 import React from "react";
 
 const About = () => {
-    return (
+  return (
     <div>
       <h2>About This Blog</h2>
       <p>This is a simple blog dashboard made with React.</p>
     </div>
-      );
+  );
 };
-export default About;
 
+export default About;
 ```
 
 ---
@@ -146,7 +149,7 @@ const App = () => {
     color: theme === "light" ? "#000000" : "#ffffff",
     minHeight: "100vh",
     padding: "1rem",
-      };
+  };
 
   return (
     <div style={appStyle}>
@@ -159,7 +162,7 @@ const App = () => {
         </Routes>
       </BrowserRouter>
     </div>
-    );
+  );
 };
 
 export default App;
@@ -181,7 +184,6 @@ root.render(
     <App />
   </ThemeProvider>
 );
-
 ```
 
 ---
@@ -203,8 +205,11 @@ root.render(
 .navbar-dark {
   background-color: #444;
 }
+
 .navbar a {
   text-decoration: none;
   color: inherit;
 }
 ```
+
+---
